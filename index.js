@@ -1,15 +1,21 @@
+require('dotenv').config();
 const express = require('express'); // Устанавливаем express для работы с сервером
 const TelegramBot = require('node-telegram-bot-api');
 const cors = require('cors'); // Для разрешения запросов с фронтенда
+// Разрешить все запросы
 
-const token = '7596711900:AAGQ74SgAHOLhkt93xoYD_rheEuLGhqHHfA';
+const token = process.env.TELEGRAM_BOT_TOKEN;
 const webAppUrl='https://prismatic-moonbeam-fb0383.netlify.app';
 const bot = new TelegramBot(token, {polling: true});
 
 const app = express();
 app.use(express.json()); // Чтобы сервер понимал JSON
-app.use(cors()); // Разрешаем запросы с фронтенда
-
+app.use(cors({
+  origin: '*', // Разрешить запросы с любых источников
+  methods: ['GET', 'POST', 'OPTIONS'], // Разрешить только нужные методы
+  allowedHeaders: ['Content-Type'], // Указать разрешённые заголовки
+}));
+app.options('*', cors()); // Обработчик preflight-запросов
 // Генерация расклада из трёх карт
 app.post('/generate', (req, res) => {
   const runes = [
@@ -64,3 +70,8 @@ bot.on('message', async(msg) => {
       })
     }
   });
+
+const PORT = 8000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
