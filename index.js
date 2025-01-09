@@ -23,25 +23,31 @@ const runesLibrary = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'runes-library.json'), 'utf8')
 );
 
-// Функция генерации расклада
 function generateLayout() {
-  const runesCount = 5; // Количество рун
-  const positionsCount = 5; // Количество позиций
-  const statesCount = 2; // Прямое или перевернутое положение
+  const runesCount = 5; // Количество доступных рун
+  const positionsCount = 5; // Количество позиций в раскладе
 
-  const keys = [];
-  for (let i = 0; i < positionsCount; i++) {
-    const runeIndex = Math.floor(Math.random() * runesCount) + 1;
-    const state = Math.round(Math.random());
-    const key = `${runeIndex}-${i+1}-${state}`;
-    keys.push(key);
-  }
+  // Группируем ключи по номерам рун
+  const runeGroups = {};
+  Object.keys(runesLibrary).forEach((key) => {
+    const [runeIndex] = key.split('-'); // Извлекаем номер руны (первая часть ключа)
+    if (!runeGroups[runeIndex]) {
+      runeGroups[runeIndex] = [];
+    }
+    runeGroups[runeIndex].push(key);
+  });
 
-  const layout = [];
-  for (const key of keys) {
-    const data = runesLibrary[key]; // Извлекаем данные по ключу
-    layout.push(data);
-  }
+  // Выбираем случайные уникальные руны
+  const selectedRunes = Object.keys(runeGroups)
+    .sort(() => Math.random() - 0.5) // Перемешиваем массив номеров рун
+    .slice(0, positionsCount); // Берем только нужное количество позиций
+
+  // Генерируем расклад
+  const layout = selectedRunes.map((runeIndex) => {
+    const possibleKeys = runeGroups[runeIndex]; // Ключи для данной руны
+    const randomKey = possibleKeys[Math.floor(Math.random() * possibleKeys.length)]; // Случайный ключ из доступных
+    return runesLibrary[randomKey]; // Достаем объект руны из библиотеки
+  });
 
   return layout;
 }
