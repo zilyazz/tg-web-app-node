@@ -2,11 +2,10 @@ require('dotenv').config();
 const express = require('express'); // Устанавливаем express для работы с сервером
 const TelegramBot = require('node-telegram-bot-api');
 const cors = require('cors'); // Для разрешения запросов с фронтенда
-// Разрешить все запросы
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
-const webAppUrl='https://prismatic-moonbeam-fb0383.netlify.app';
-const bot = new TelegramBot(token, {polling: true});
+const webAppUrl = 'https://prismatic-moonbeam-fb0383.netlify.app';
+const bot = new TelegramBot(token, { polling: true });
 
 const app = express();
 app.use(express.json()); // Чтобы сервер понимал JSON
@@ -16,60 +15,62 @@ app.use(cors({
   allowedHeaders: ['Content-Type'], // Указать разрешённые заголовки
 }));
 app.options('*', cors()); // Обработчик preflight-запросов
-// Генерация расклада из трёх карт
+
+// Загрузка библиотеки рун
+const fs = require('fs');
+const path = require('path');
+const runesLibrary = JSON.parse(
+  fs.readFileSync(path.join(__dirname, 'runes-library.json'), 'utf8')
+);
+
+// Функция генерации расклада
+function generateLayout() {
+  const runesCount = 24; // Количество рун
+  const positionsCount = 5; // Количество позиций
+  const statesCount = 2; // Прямое или перевернутое положение
+
+  const keys = [];
+  for (let i = 0; i < positionsCount; i++) {
+    const runeIndex = Math.floor(Math.random() * runesCount) + 1;
+    const state = Math.round(Math.random());
+    const key = `${runeIndex}-${i+1}-${state}`;
+    keys.push(key);
+  }
+
+  const layout = [];
+  for (const key of keys) {
+    const data = runesLibrary[key]; // Извлекаем данные по ключу
+    layout.push(data);
+  }
+
+  return layout;
+}
+
+// Маршрут для генерации расклада
 app.post('/generate', (req, res) => {
-  const runes = [
-  'ᚠ (Феху) - Благосостояние, изобилие',
-  'ᚢ (Уруз) - Сила, здоровье',
-  'ᚦ (Турисаз) - Препятствия, защита',
-  'ᚨ (Ансуз) - Знание, вдохновение',
-  'ᚱ (Райдо) - Путешествие, движение',
-  'ᚲ (Кеназ) - Озарение, ясность',
-  'ᚷ (Гебо) - Партнёрство, дар',
-  'ᚹ (Вуньо) - Радость, успех',
-  'ᚺ (Хагалаз) - Перемены, разрушение',
-  'ᚾ (Наутиз) - Необходимость, терпение',
-  'ᛁ (Иса) - Застой, покой',
-  'ᛃ (Йера) - Урожай, результаты',
-  'ᛇ (Эйваз) - Защита, трансформация',
-  'ᛈ (Перт) - Тайна, судьба',
-  'ᛉ (Альгиз) - Защита, интуиция',
-  'ᛊ (Совило) - Сила, успех',
-  'ᛏ (Тейваз) - Мужество, справедливость',
-  'ᛒ (Беркана) - Рождение, рост',
-  'ᛖ (Эваз) - Прогресс, движение',
-  'ᛗ (Манназ) - Человечество, помощь',
-  'ᛚ (Лагуз) - Интуиция, вода',
-  'ᛜ (Ингуз) - Плодородие, завершение',
-  'ᛞ (Дагаз) - Новое начало, пробуждение',
-  'ᛟ (Одал) - Наследие, имущество',
-  ];
+  const layout = generateLayout(); // Генерируем расклад
 
-  // Перемешиваем и выбираем 3 случайные карты
-  const shuffled = runes.sort(() => 0.5 - Math.random());
-  const selectedRunes = shuffled.slice(0, 3);
-
-  res.json({ runes: selectedRunes });
+  res.json(layout); // Возвращаем расклад в формате JSON
 });
 
 // Telegram bot handler
-
-
-bot.on('message', async(msg) => {
+bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text;
-  
-  if(text ==='/start') {
 
-       await bot.sendMessage(chatId, 'Привет! Заходи, и получишь все ответы про свою судьбу', {
-                   reply_markup: {
-                           inline_keyboard: [
-                           [{text: 'Узнать свою судьбу', web_app: {url: webAppUrl}}]
-                           ]
-                   }
-      })
-    }
-  });
+  if (text === '/start') {
+    await bot.sendMessage(chatId, 'Привет! Заходи, и получишь все ответы про свою судьбу', {
+      reply_markup: {
+        inline_keyboard: [
+          [{
+            text: 'Узнать свою судьбу',
+            web_app: { url: webAppUrl }
+          }]
+        ]
+      }
+    });
+  }
+});
 
 const PORT = 8000;
 app.listen(PORT, () => {
