@@ -25,7 +25,7 @@ const runesLibrary = JSON.parse(
 
 // Функция генерации расклада
 function generateLayout() {
-  const runesCount = 24; // Количество рун
+  const runesCount = 5; // Количество рун
   const positionsCount = 5; // Количество позиций
   const statesCount = 2; // Прямое или перевернутое положение
 
