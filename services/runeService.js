@@ -3,6 +3,7 @@ const path = require('path');
 const runesLibrary = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../runes-library.json'), 'utf8')
 );
+const supabase = require('../supabaseClient');
 
 module.exports = {
   generateLayout: () => {
@@ -32,5 +33,24 @@ module.exports = {
     });
 
     return layout;
+  },
+  addPointsForLayout: async (telegramId) => {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('score')
+      .eq('telegram', telegramId)
+      .single();
+
+    if (user) {
+      const updatedScore = user.score + 10; // 10 очков за расклад
+      await supabase
+        .from('users')
+        .update({ score: updatedScore })
+        .eq('telegram', telegramId);
+    } else {
+      await supabase
+        .from('users')
+        .insert([{ telegram: telegramId, score: 10, tasks: [] }]);
+    }
   },
 };

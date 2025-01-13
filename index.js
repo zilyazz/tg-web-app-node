@@ -4,6 +4,8 @@ const config = require('./config/config');
 const corsMiddleware = require('./middlewares/corsMiddleware');
 const apiHandlers = require('./handlers/apiHandlers');
 const botHandlers = require('./handlers/botHandlers');
+const taskService = require('./services/taskService');
+require('dotenv').config(); // Загружаем переменные окружения из .env
 
 // Инициализация бота
 const bot = new TelegramBot(config.token, { polling: true });
@@ -16,6 +18,27 @@ app.options('*', corsMiddleware); // Обработчик preflight-запрос
 
 // Обработчики API
 app.post('/generate', apiHandlers.generateLayout);
+
+// Новые endpoint'ы для заданий
+app.get('/tasks', async (req, res) => {
+  try {
+    const tasks = await taskService.getTasks();
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/complete-task', async (req, res) => {
+  const { telegramId, taskId } = req.body;
+
+  try {
+    const result = await taskService.completeTask(telegramId, taskId);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
 
 // Обработчики бота
 const { handleStart } = botHandlers(bot, config.webAppUrl);

@@ -1,8 +1,15 @@
 const runeService = require('../services/runeService');
 
 module.exports = {
-  generateLayout: (req, res) => {
-    const layout = runeService.generateLayout(); // Генерируем расклад
-    res.json(layout); // Возвращаем расклад в формате JSON
+  generateLayout: async (req, res) => {
+    const { telegramId } = req.body;
+
+    try {
+      const layout = runeService.generateLayout();
+      await runeService.addPointsForLayout(telegramId);
+      res.json(layout);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   },
 };
