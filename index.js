@@ -18,6 +18,7 @@ app.options('*', corsMiddleware); // Обработчик preflight-запрос
 
 // Обработчики API
 app.post('/generate', apiHandlers.generateLayout);
+app.get('/score', apiHandlers.getScore);
 
 // Новые endpoint'ы для заданий
 app.get('/tasks', async (req, res) => {
