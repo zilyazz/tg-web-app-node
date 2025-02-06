@@ -34,6 +34,7 @@ module.exports = {
         .update({ score: updatedScore })
         .eq('telegram', telegramId);
     } else {
+      updatedScore = 10;
       await supabase
         .from('users')
         .insert([{ telegram: telegramId, score: updatedScore, tasks: [] }]);
