@@ -5,6 +5,7 @@ const corsMiddleware = require('./middlewares/corsMiddleware');
 const apiHandlers = require('./handlers/apiHandlers');
 const botHandlers = require('./handlers/botHandlers');
 const taskService = require('./services/taskService');
+const spreadHandler = require('./handlers/spreadHandler');
 require('dotenv').config(); // Загружаем переменные окружения из .env
 
 // Инициализация бота
@@ -18,7 +19,8 @@ app.options('*', corsMiddleware); // Обработчик preflight-запрос
 
 // Обработчики API
 app.post('/generate', apiHandlers.generateLayout);
-app.get('/score', apiHandlers.getScore);
+app.get('/spread/history/:userId', spreadHandler.getSpreadHistory);
+app.get('/spread/details/:spreadId', spreadHandler.getSpreadDetails);
 
 // Новые endpoint'ы для заданий
 app.get('/tasks', async (req, res) => {
