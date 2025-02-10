@@ -36,10 +36,10 @@ async function checkMessageSent(userId) {
 // Функция проверки выполнения расклада
 async function checkClassicSpread(userId) {
     const { data, error } = await supabase
-      .from('tarot_spreads')
+      .from('spreads')
       .select('*')
       .eq('user_id', userId)
-      .eq('spread_type', 'classic') // Проверяем только классический расклад
+      //.eq('spread_type', 'classic') // Проверяем только классический расклад
       .gt('timestamp', new Date().setHours(0, 0, 0, 0));
   
     if (error) {
