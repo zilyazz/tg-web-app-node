@@ -6,6 +6,7 @@ const apiHandlers = require('./handlers/apiHandlers');
 const botHandlers = require('./handlers/botHandlers');
 const taskService = require('./services/taskService');
 const spreadHandler = require('./handlers/spreadHandler');
+const { getDailyTasksWithStatus, completeTask } = require('./handlers/taskHandler');
 require('dotenv').config(); // Загружаем переменные окружения из .env
 
 // Инициализация бота
@@ -21,6 +22,8 @@ app.options('*', corsMiddleware); // Обработчик preflight-запрос
 app.post('/generate', apiHandlers.generateLayout);
 app.get('/spread/history/:userId', spreadHandler.getSpreadHistory);
 app.get('/spread/details/:spreadId', spreadHandler.getSpreadDetails);
+app.get('/tasks/daily/:userId', getDailyTasksWithStatus);
+app.post('/tasks/complete', completeTask);
 
 // Новые endpoint'ы для заданий
 app.get('/tasks', async (req, res) => {
