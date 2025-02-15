@@ -9,11 +9,13 @@ module.exports = {
   generateLayout: () => {
     const keys = Object.keys(runesLibrary);
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
+    const type = 1
     
     return {
       key: randomKey,
       runes: runesLibrary[randomKey].runes,
-      description: runesLibrary[randomKey].description
+      description: runesLibrary[randomKey].description,
+      type: type
     };
   },
 

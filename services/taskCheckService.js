@@ -35,20 +35,29 @@ async function checkMessageSent(userId) {
 
 // Функция проверки выполнения расклада
 async function checkClassicSpread(userId) {
-    const { data, error } = await supabase
-      .from('spreads')
-      .select('*')
-      .eq('user_id', userId)
-      //.eq('spread_type', 'classic') // Проверяем только классический расклад
-      .gt('timestamp', new Date().setHours(0, 0, 0, 0));
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0); // Устанавливаем 00:00:00
   
-    if (error) {
-      console.error('Ошибка при проверке классического расклада:', error);
-      return false;
-    }
-  
-    return data.length > 0;
+  const dateString = startOfDay.toISOString().slice(0, 19).replace('T', ' ');
+
+  console.log(`Проверка расклада с датой: ${dateString}`);
+
+  const { data, error } = await supabase
+    .from('spreads')
+    .select('*')
+    .eq('Userid', userId)
+    .eq('Type', 1) // Проверяем только классический расклад
+    .gte('DateCreate', dateString);
+
+  if (error) {
+    console.error('Ошибка при проверке классического расклада:', error);
+    return false;
   }
+
+  console.log(`Найдено раскладов: ${data.length}`);
+  return data.length > 0;
+}
+
   
   // Добавляем в маппинг
   const taskChecks = {

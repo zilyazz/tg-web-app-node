@@ -20,7 +20,8 @@ module.exports = {
           {
             Userid: telegramId,        // ID пользователя
             Runes: layout.key,  // Сохраняем ключи рун как строку JSON
-            Description: layout.description  // Описание расклада
+            Description: layout.description,  // Описание расклада
+            Type: layout.type
           }
         ]);
 
