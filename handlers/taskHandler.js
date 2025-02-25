@@ -5,8 +5,6 @@ const taskChecks = require('../services/taskCheckService');
 async function getDailyTasksWithStatus(req, res) {
   const userId = req.params.userId;
 
-  console.log('Запрос на получение статуса заданий для пользователя:', userId);
-
   try {
     // Получаем сегодняшние задания с информацией из tasks
     const { data: dailyTasks, error: taskError } = await supabase
@@ -19,7 +17,7 @@ async function getDailyTasksWithStatus(req, res) {
       throw taskError;
     }
 
-    console.log('Полученные задания на сегодня:', dailyTasks);
+   // console.log('Полученные задания на сегодня:', dailyTasks);
 
     // Получаем список выполненных заданий пользователя
     const { data: userData, error: userError } = await supabase
@@ -32,10 +30,12 @@ async function getDailyTasksWithStatus(req, res) {
       throw userError;
     }
 
-    let completedTasks = userData?.daily_tasks_id || [];
-    let claimedRewards = userData.claimed_rewards || [];
-    console.log('Список выполненных заданий пользователя:', completedTasks);
-    console.log('Список собранных наград пользователя:', claimedRewards);
+    //let completedTasks = userData?.daily_tasks_id || [];
+    let completedTasks = Array.isArray(userData?.daily_tasks_id) 
+    ? userData.daily_tasks_id 
+    : JSON.parse(userData?.daily_tasks_id || "[]");
+
+    let claimedRewards = userData[0]?.claimed_rewards || []; // Явно берем из массива
 
     // Получаем подробную информацию о заданиях (description, points, check_function)
     const taskIds = dailyTasks.map(task => task.task_id);
@@ -49,14 +49,12 @@ async function getDailyTasksWithStatus(req, res) {
       throw taskDetailsError;
     }
 
-    console.log('Детальная информация о заданиях:', tasks);
-
     // Проверяем выполнение заданий
     const tasksWithStatus = await Promise.all(dailyTasks.map(async (task) => {
       const taskInfo = tasks.find(t => t.id === task.task_id); // Находим полную информацию о задании по task_id
       let isCompleted = completedTasks.includes(task.task_id);
       let isAvailable = false;
-      let isClaimed = claimedRewards.includes(task.task_id); // Проверяем, собраны ли очки для задания
+      let isClaimed = claimedRewards.includes(task.task_id);// Проверяем, собраны ли очки для задания
 
       // Проверяем доступность задания с учетом функции проверки
       if (taskInfo.check_function && !isCompleted) { // Добавляем условие, что задание не выполнено
@@ -108,7 +106,7 @@ async function getDailyTasksWithStatus(req, res) {
       };
     }));
 
-    console.log('Статус заданий с информацией о выполнении и доступности:', tasksWithStatus);
+    //console.log('Статус заданий с информацией о выполнении и доступности:', tasksWithStatus);
 
     res.json(tasksWithStatus);
   } catch (error) {

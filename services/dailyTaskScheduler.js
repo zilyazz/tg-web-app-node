@@ -64,7 +64,10 @@ async function updateDailyTasks() {
 
     // Очищаем выполненные задания у пользователей
     //console.log('Очищаем выполненные задания у пользователей...');
-    const { data: usersData, error: usersError } = await supabase.from('users').update({ daily_tasks_id: [] }).neq('id', 0);
+    const { error: usersError } = await supabase.from('users').update({
+      daily_tasks_id: [],
+      claimed_rewards: [],
+    }).neq('id', 0);
 
     if (usersError) {
       console.error('Ошибка обновления пользователей:', usersError.message);
