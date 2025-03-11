@@ -1,19 +1,19 @@
 /*************************************************************
 Функция очистки истории раскладов
-Оставляет только 5 последний уникальных дней (не подряд)
+Оставляет только 5 последних уникальных раскладов у каждого пользователя
 *************************************************************/
 
-//require('dotenv').config();
+require('dotenv').config();
 const supabase = require('../supabaseClient');
 
 async function cleanUpSpreadHistory() {
     try {
-        console.log("🔹 Начинаем очистку истории раскладов...");
+        //console.log("🔹 Начинаем очистку истории раскладов...");
 
         // Получаем все расклады, отсортированные по дате (от новых к старым)
         const { data: spreads, error: dateError } = await supabase
             .from('spreads')
-            .select('Userid, DateCreate')
+            .select('id, Userid, DateCreate')
             .order('DateCreate', { ascending: false });
 
         if (dateError) {
@@ -21,71 +21,53 @@ async function cleanUpSpreadHistory() {
             return;
         }
 
-        console.log("📊 Получено записей:", spreads.length);
-
         if (!spreads || spreads.length === 0) {
             console.log("⚠️ Нет данных для обработки, выходим.");
             return;
         }
 
-        // Группируем данные по пользователям
-        const userDates = {};
+        //console.log("📊 Получено записей:", spreads.length);
 
-        spreads.forEach(({ Userid, DateCreate }) => {
-            const date = new Date(DateCreate).toISOString().split('T')[0]; // Формат YYYY-MM-DD
-            
-            if (!userDates[Userid]) {
-                userDates[Userid] = new Set();
+        // Группируем расклады по пользователям
+        const userSpreads = {};
+
+        spreads.forEach(({ id, Userid, DateCreate }) => {
+            if (!userSpreads[Userid]) {
+                userSpreads[Userid] = [];
             }
-            
-            userDates[Userid].add(date);
+            userSpreads[Userid].push({ id, date: new Date(DateCreate).toISOString().split('T')[0] });
         });
 
-        // Оставляем только 5 последних уникальных дат для каждого пользователя
-        const allowedDatesByUser = {};
-        Object.keys(userDates).forEach(userId => {
-            allowedDatesByUser[userId] = [...userDates[userId]].slice(0, 5);
+        // Определяем, какие записи оставить (5 последних у каждого пользователя)
+        const allowedIds = new Set();
+        Object.keys(userSpreads).forEach(userId => {
+            const uniqueDates = new Set();
+            userSpreads[userId].forEach(spread => {
+                if (uniqueDates.size < 5) {
+                    uniqueDates.add(spread.date);
+                    allowedIds.add(spread.id);
+                }
+            });
         });
 
-        // Создаем массив дат, которые нужно оставить
-        const allowedDates = new Set();
-        Object.values(allowedDatesByUser).forEach(dates => {
-            dates.forEach(date => allowedDates.add(date));
-        });
+        //console.log("✅ Оставляем записи с ID:", [...allowedIds]);
 
-        console.log("✅ Оставляем записи за даты:", [...allowedDates]);
-
-        // Если нет дат для удаления — выходим
-        if (allowedDates.size === 0) {
-            console.log("⚠️ Нет дат для удаления, выходим.");
-            return;
-        }
-
-        console.log("🚨 Удаляем записи, не входящие в эти даты:", [...allowedDates]);
-
-        // Удаляем записи, у которых дата не входит в список разрешенных
+        // Удаляем записи, которых нет в allowedIds
         const { error: deleteError } = await supabase
         .from('spreads')
         .delete()
-        .not('DateCreate', 'in', 
-          supabase
-            .from('spreads')
-            .select('DateCreate')
-            .in('DateCreate', [...allowedDates].map(date => `${date} 00:00:00`))
-        );
-      
-      
-      
+        .not('id', 'in', `(${[...allowedIds].join(',')})`);
       
 
         if (deleteError) {
             console.error('❌ Ошибка при удалении старых записей:', deleteError);
         } else {
-            console.log("🎉 Очистка завершена: оставлены только последние 5 дней для каждого пользователя.");
+            console.log("🎉 Очистка завершена: оставлены только последние 5 раскладов для каждого пользователя.");
         }
     } catch (error) {
         console.error('❌ Ошибка очистки истории:', error.message);
     }
 }
-  cleanUpSpreadHistory();
-  module.exports = cleanUpSpreadHistory;
+
+cleanUpSpreadHistory();
+module.exports = cleanUpSpreadHistory;
