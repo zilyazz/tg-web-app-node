@@ -8,7 +8,7 @@ const taskService = require('./services/taskService');
 const spreadHandler = require('./handlers/spreadHandler');
 const { getDailyTasksWithStatus, completeTask } = require('./handlers/taskHandler');
 const { getDailyRune, flipRune } = require('./services/dailyRuneUser');
-require('dotenv').config(); // Загружаем переменные окружения из .en
+require('dotenv').config(); // Загружаем переменные окружения из .env
 
 // Инициализация бота
 const bot = new TelegramBot(config.token, { polling: true });
