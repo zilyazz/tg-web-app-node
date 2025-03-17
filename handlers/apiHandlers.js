@@ -3,10 +3,10 @@ const supabase = require('../supabaseClient');
 
 module.exports = {
   generateLayout: async (req, res) => {
-    const { telegramId } = req.body;
+    const { telegramId,theme,type } = req.body;
 
     try {
-      const layout = runeService.generateLayout();
+      const layout = runeService.generateLayout(theme,type);
       const scoreUser = await runeService.addPointsForLayout(telegramId);
      // await runeService.addPointsForLayout(telegramId); //добавляем когда добавим БД и очки
 
@@ -22,6 +22,7 @@ module.exports = {
             Userid: telegramId,      
             Runes: JSON.stringify(runeKeys),  // Сохраняем ключи рун как строку JSON //FIXME: скорее всего должно быть runeKeys, иначе сохраняется только одно значение вместо массива.
             Description: layout.description,  
+            Theme:layout.theme,
             Type: layout.type
           }
         ]);

@@ -40,6 +40,8 @@ module.exports = {
       key: randomKey,
       runes: library[randomKey].runes,
       description: library[randomKey].description,
+      theme:theme,
+      type: type
     };
   },
 
