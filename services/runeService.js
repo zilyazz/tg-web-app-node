@@ -1,33 +1,56 @@
 const fs = require('fs');
 const path = require('path');
-const runesLibrary = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../Rune.json'), 'utf8')
-);
 const supabase = require('../supabaseClient');
+const { threadId } = require('worker_threads');
 
+// **Загружаем библиотеки**
+//const runesLibrary = JSON.parse(
+//  fs.readFileSync(path.join(__dirname, '../Rune.json'), 'utf8')
+//);
+const runesLibrary = {
+class:{
+  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/Rune.json'), 'utf8'))
+},  
+love:{
+  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestLove.json'), 'utf8')),
+  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneLove.json'), 'utf8'))
+},
+energy:{
+  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestEnergy.json'), 'utf8')),
+  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneEnergy.json'), 'utf8'))
+},
+finance:{
+  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestFinance.json'), 'utf8'))
+},
+career:{
+  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneCareer.json'), 'utf8'))
+},
+};
 module.exports = {
-  generateLayout: () => {
-    const keys = Object.keys(runesLibrary);
+  generateLayout: (theme,type) => {
+    if(!runesLibrary[theme] || !runesLibrary[theme][type]){
+      throw new Error ("Выбранная тема или тип расклада отсутствует");
+    }
+
+    const library = runesLibrary[theme][type];
+    const keys = Object.keys(library);
     const randomKey = keys[Math.floor(Math.random() * keys.length)];
-    const type = 1
-    
+
     return {
       key: randomKey,
-      runes: runesLibrary[randomKey].runes,
-      description: runesLibrary[randomKey].description,
-      type: type
+      runes: library[randomKey].runes,
+      description: library[randomKey].description,
     };
   },
 
  //добавим когда бд будет и учет очков за расклад
- addPointsForLayout: async (telegramId) => {
+  addPointsForLayout: async (telegramId) => {
   const { data: user, error } = await supabase
     .from('users')
     .select('id,score')
     .eq('telegram', telegramId)
     .single();
-   
-
+  
   let updatedScore;
   let experiencePoints = 5; // Фиксированное количество очков опыта за расклад
   let updexpPoints;
