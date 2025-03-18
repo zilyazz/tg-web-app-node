@@ -13,14 +13,16 @@ module.exports = {
   
       // Извлекаем ключи (key) рун из объекта layout
       const runeKeys = layout.runes.map(rune => rune.key);
-
+      console.log("layout.runes:", layout.runes);
+      console.log("runeKeys:", runeKeys);
+      
       // Сохраняем данные в таблицу spreads в Supabase
       const { data, error } = await supabase 
         .from('spreads')
         .insert([
           {
             Userid: telegramId,      
-            Runes: JSON.stringify(runeKeys),  // Сохраняем ключи рун как строку JSON //FIXME: скорее всего должно быть runeKeys, иначе сохраняется только одно значение вместо массива.
+            Runes: runeKeys,//JSON.stringify(runeKeys),  // Сохраняем ключи рун как строку JSON //FIXME: скорее всего должно быть runeKeys, иначе сохраняется только одно значение вместо массива.
             Description: layout.description,  
             Theme:layout.theme,
             Type: layout.type
