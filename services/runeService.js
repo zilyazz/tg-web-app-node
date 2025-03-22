@@ -56,6 +56,8 @@ module.exports = {
   let updatedScore;
   let experiencePoints = 5; // Фиксированное количество очков опыта за расклад
   let updexpPoints;
+  let newLevel = null;
+  let levelUp = false; 
 
   if (user) {
     updatedScore = user.score + 10; // +10 очков денег за расклад
@@ -67,7 +69,7 @@ module.exports = {
     // Получаем текущий опыт пользователя
     const { data: experienceData, error: experienceError } = await supabase
       .from('user_experience')
-      .select('id,experience')
+      .select('id,experience,level_id')
       .eq('user_id', user.id)
       .single();
 
@@ -84,7 +86,27 @@ module.exports = {
       updexpPoints = experiencePoints;
       await supabase
         .from('user_experience')
-        .insert([{ user_id: user.id, experience: updexpPoints }]);        
+        .insert([{ user_id: user.id, experience: updexpPoints }]);     
+    }
+
+    //Проверка на уровень (не стоит ли обновить)
+    const{data: levelData,error: levelError} = await supabase
+    .from('levels')
+    .select('id','level_name')
+    .lte('experience_required',updexpPoints)
+    .order('experience_required', {ascending:false} )
+    .limit(1)
+
+    if (levelError) throw levelError;
+
+    newLevel = levelData.length ? levelData[0].id : experienceData.level_id
+    
+    if (newLevel !== experienceData.level_id) {
+      levelUp = true;
+      await supabase
+        .from('user_experience')
+        .update({level_id: newLevel})
+        .eq ('user_id',user.id)
     }
 
   } else {
@@ -105,6 +127,11 @@ module.exports = {
     updexpPoints = experiencePoints;
   }
 
-  return { score: updatedScore, experience: updexpPoints };
- },
+  return { 
+    score: updatedScore, 
+    experience: updexpPoints, 
+    level: newLevel,
+    levelUp: levelUp
+  };
+},
 };

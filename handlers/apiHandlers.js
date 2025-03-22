@@ -9,12 +9,6 @@ module.exports = {
       const layout = runeService.generateLayout(theme,type);
       const scoreUser = await runeService.addPointsForLayout(telegramId);
      // await runeService.addPointsForLayout(telegramId); //добавляем когда добавим БД и очки
-
-  
-      // Извлекаем ключи (key) рун из объекта layout
-      const runeKeys = layout.runes.map(rune => rune.key);
-      console.log("layout.runes:", layout.runes);
-      console.log("runeKeys:", runeKeys);
       
       // Сохраняем данные в таблицу spreads в Supabase
       const { data, error } = await supabase 
@@ -22,7 +16,7 @@ module.exports = {
         .insert([
           {
             Userid: telegramId,      
-            Runes: runeKeys,//JSON.stringify(runeKeys),  // Сохраняем ключи рун как строку JSON //FIXME: скорее всего должно быть runeKeys, иначе сохраняется только одно значение вместо массива.
+            Runes: layout.key,
             Description: layout.description,  
             Theme:layout.theme,
             Type: layout.type
