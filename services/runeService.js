@@ -8,45 +8,84 @@ const { threadId } = require('worker_threads');
 //  fs.readFileSync(path.join(__dirname, '../Rune.json'), 'utf8')
 //);
 const runesLibrary = {
-class:{
-  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/Rune.json'), 'utf8'))
-},  
-love:{
-  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestLove.json'), 'utf8')),
-  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneLove.json'), 'utf8'))
-},
-energy:{
-  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestEnergy.json'), 'utf8')),
-  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneEnergy.json'), 'utf8'))
-},
-finance:{
-  cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestFinance.json'), 'utf8'))
-},
-career:{
-  classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneCareer.json'), 'utf8'))
-},
-};
-module.exports = {
-  generateLayout: (theme,type) => {
-    if(!runesLibrary[theme] || !runesLibrary[theme][type]){
-      throw new Error ("Выбранная тема или тип расклада отсутствует");
+  class:{
+    classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/Rune.json'), 'utf8'))
+  },  
+  love:{
+    cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestLove.json'), 'utf8')),
+    classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneLove.json'), 'utf8')),
+    pyramid:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/PyramidLove.json'), 'utf8'))
+  },
+  energy:{
+    cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestEnergy.json'), 'utf8')),
+    classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneEnergy.json'), 'utf8')),
+    pyramid:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/PyramidEnergy.json'), 'utf8'))
+  },
+  finance:{
+    cross:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/KrestFinance.json'), 'utf8'))
+  },
+  career:{
+    classic:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/RuneCareer.json'), 'utf8')),
+    pyramid:JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/PyramidCareer.json'), 'utf8'))
+  },
+  danet:{
+    classic: {
+      Да: {description: 'Да'},
+      Нет: {description: 'Нет'}
     }
+  }
+};
 
-    const library = runesLibrary[theme][type];
-    const keys = Object.keys(library);
-    const randomKey = keys[Math.floor(Math.random() * keys.length)];
 
+//* Функция для генерации расклада
+async function generateLayout (theme,type) {
+  if(!runesLibrary[theme] || !runesLibrary[theme][type]){
+    throw new Error ("Выбранная тема или тип расклада отсутствует");
+  }
+
+  if (theme === 'danet') {
+    const response = Math.random() < 0.5? 'Да': 'Нет';
     return {
-      key: randomKey,
-      runes: library[randomKey].runes,
-      description: library[randomKey].description,
-      theme:theme,
+      key: response,
+      runes: [],
+      description: runesLibrary[theme][type][response].description,
+      theme: theme,
       type: type
     };
-  },
+  }
 
- //добавим когда бд будет и учет очков за расклад
-  addPointsForLayout: async (telegramId) => {
+  const library = runesLibrary[theme][type];
+  const keys = Object.keys(library);
+  const randomKey = keys[Math.floor(Math.random() * keys.length)]; //! Разобрать
+  console.log("🚀 ~ generateLayout ~ library[randomKey]:", library[randomKey])
+  return {
+    key: randomKey,
+    runes: library[randomKey].runes,
+    description: library[randomKey].description,
+    theme:theme,
+    type: type
+  };  
+}
+
+//*Добавление записи в spread (история расклада)
+async function insertInSpread (telegramId,layout) {     // Сохраняем данные в таблицу spreads в Supabase
+  if (layout.theme !='danet'){
+  const { data, error } = await supabase 
+    .from('spreads')
+    .insert([
+      {
+        Userid: telegramId,      
+        Runes: layout.key,
+        Description: layout.description,  
+        Theme:layout.theme,
+        Type: layout.type
+      }
+    ]);
+  }
+}
+
+//* Добавление очков и опыта за расклад
+async function addPointsForLayout (telegramId) {
   const { data: user, error } = await supabase
     .from('users')
     .select('id,score')
@@ -133,5 +172,11 @@ module.exports = {
     level: newLevel,
     levelUp: levelUp
   };
-},
+}
+
+
+module.exports = {
+  generateLayout,
+  insertInSpread,
+  addPointsForLayout,
 };
