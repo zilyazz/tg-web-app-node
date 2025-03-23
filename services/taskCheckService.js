@@ -46,7 +46,8 @@ async function checkClassicSpread(userId) {
     .from('spreads')
     .select('*')
     .eq('Userid', userId)
-    .eq('Type', 1) // Проверяем только классический расклад
+    .eq('Theme', 'class') // Проверяем только классический расклад
+    .eq('Type','classic')
     .gte('DateCreate', dateString);
 
   if (error) {

@@ -57,7 +57,6 @@ async function generateLayout (theme,type) {
   const library = runesLibrary[theme][type];
   const keys = Object.keys(library);
   const randomKey = keys[Math.floor(Math.random() * keys.length)]; //! Разобрать
-  console.log("🚀 ~ generateLayout ~ library[randomKey]:", library[randomKey])
   return {
     key: randomKey,
     runes: library[randomKey].runes,
@@ -110,7 +109,7 @@ async function addPointsForLayout (telegramId) {
       .from('user_experience')
       .select('id,experience,level_id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     console.log("Найденная запись опыта:", experienceData, "Ошибка:", experienceError);
 
@@ -125,7 +124,7 @@ async function addPointsForLayout (telegramId) {
       updexpPoints = experiencePoints;
       await supabase
         .from('user_experience')
-        .insert([{ user_id: user.id, experience: updexpPoints }]);     
+        .insert([{ user_id: user.id, experience: updexpPoints,level_id: 1 }]);     
     }
 
     //Проверка на уровень (не стоит ли обновить)
@@ -138,9 +137,9 @@ async function addPointsForLayout (telegramId) {
 
     if (levelError) throw levelError;
 
-    newLevel = levelData.length ? levelData[0].id : experienceData.level_id
+    newLevel = levelData.length ? levelData[0].id : (experienceData  ? experienceData.level_id: 1)
     
-    if (newLevel !== experienceData.level_id) {
+    if (newLevel !== (experienceData  ? experienceData.level_id: 1)) {
       levelUp = true;
       await supabase
         .from('user_experience')
@@ -152,7 +151,7 @@ async function addPointsForLayout (telegramId) {
     updatedScore = 10;
     const { data: newUser, error: newUserError } = await supabase
       .from('users')
-      .insert([{ telegram: telegramId, score: updatedScore, tasks: [] }])
+      .insert([{ telegram: telegramId, score: updatedScore }])
       .select('id')
       .single();
 
@@ -161,7 +160,7 @@ async function addPointsForLayout (telegramId) {
     // Начисляем опыт новому пользователю
     await supabase
       .from('user_experience')
-      .insert([{ user_id: newUser.id, experience: experiencePoints }]);
+      .insert([{ user_id: newUser.id, experience: experiencePoints, level_id: 1 }]);
     
     updexpPoints = experiencePoints;
   }
