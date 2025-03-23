@@ -9,6 +9,7 @@ const spreadHandler = require('./handlers/spreadHandler');
 const { getDailyTasksWithStatus, completeTask } = require('./handlers/taskHandler');
 //const { getDailyRune, flipRune } = require('./services/dailyRuneUser');
 const dailyRuneHandler = require('./handlers/dailyRuneUserHandler');
+const raiting = require('./handlers/raitHandler');
 require('dotenv').config(); // Загружаем переменные окружения из .en
 
 // Инициализация бота
@@ -30,6 +31,7 @@ app.post('/tasks/complete', completeTask);
 //app.post('/flipRune/:telegramId',flipRune);
 app.get('/dailyRuneUser/:telegramId', dailyRuneHandler.getDailyRune);
 app.post('/flipRune/:telegramId', dailyRuneHandler.flipRune);
+app.get('/raiting', raiting.raitStat);
 
 // Новые endpoint'ы для заданий
 app.get('/tasks', async (req, res) => {

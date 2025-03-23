@@ -42,7 +42,7 @@ async function generateLayout (theme,type) {
   if(!runesLibrary[theme] || !runesLibrary[theme][type]){
     throw new Error ("Выбранная тема или тип расклада отсутствует");
   }
-
+  //Генерация Да/Нет (в бд не учитываем)
   if (theme === 'danet') {
     const response = Math.random() < 0.5? 'Да': 'Нет';
     return {

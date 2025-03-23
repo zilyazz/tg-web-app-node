@@ -57,6 +57,7 @@ async function getOrCreateUserRune (userId) {
 }
 
 //* Метод для поиск руны по ID из библиотеки dailyRunes
+
 async function getRuneById(runeId) {
   if (!runeId) return null; // Если руны нет, сразу возвращаем null
 
@@ -64,6 +65,7 @@ async function getRuneById(runeId) {
 }
 
 //* Метод для переворачивания руны (т.е. генерации новой руны дня для пользователя)
+
 async function flipRune(userId) {
   const randomRune = dailyRunes[Math.floor(Math.random() * dailyRunes.length)];
   const { error: updateError } = await supabase
