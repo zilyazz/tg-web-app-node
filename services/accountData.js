@@ -17,8 +17,8 @@ async function accountData(telegramId) {
       .select('id,score')
       .single();
     
-      if(insError) throw insError;
-      user = newUser;
+    if(insError) throw insError;
+    user = newUser;
   }
 
   let{data:expUser,error:expError} = await supabase
@@ -30,8 +30,8 @@ async function accountData(telegramId) {
   if (expError) throw expError;
   if(!expUser) {
     const {insExpError} = await supabase
-    .from('user_experience')
-    .insert([{user_id:user.id,experience:0,level_id:1}])
+      .from('user_experience')
+      .insert([{user_id:user.id,experience:0,level_id:1}])
 
     if (insExpError) throw insExpError;
     expUser = { experience: 0, levels: { level_name: 'Новичок' } }; // Дефолтные значения

@@ -6,15 +6,16 @@ module.exports = {
       const telegramId = req.params.telegramId;
 
       const acData = await accountData.accountData(telegramId);
-      //const user = await dailyRuneUser.getOrCreateUser(telegramId);
       let userRune = await dailyRuneUser.getOrCreateUserRune(acData.userId);
+      const { userId, ...responseData } = acData; //деструктуризация чтобы не выводил userId в return
+
       if (!userRune.rune) {
         // Если rune = NULL, показываем "рубашку" 
         return res.json({
           name: "Скрытая руна",
           image: "./runes/cover.png",
           description: "Переверните руну, чтобы узнать её значение.",
-          ...acData
+          ...responseData
         });
       } 
         // Если rune уже есть, значит она перевернута — отправляем её
@@ -23,7 +24,7 @@ module.exports = {
         name: runeData.name,
         image: runeData.image,
         description: runeData.description,
-        ...acData
+        ...responseData
       });
     } catch (error) {
         console.error("🚨 Ошибка:", error.message);
@@ -34,13 +35,13 @@ module.exports = {
   flipRune: async (req,res) => {
     try{
       const telegramId = req.params.telegramId;
-      const user = await dailyRuneUser.getOrCreateUser(telegramId);
-      let userRune = await dailyRuneUser.getOrCreateUserRune(user.id);
+      const acData = await accountData.accountData(telegramId);
+      /*let userRune = await dailyRuneUser.getOrCreateUserRune(acData.userId);
       if(userRune.rune) {
         return res.status(400).json({ error: "Руна уже перевернута" });
-      }
+      } */
 
-      const newDailyRune = await dailyRuneUser.flipRune(user.id);
+      const newDailyRune = await dailyRuneUser.flipRune(acData.userId);
       // перевернутую руну
       return res.json({
         name: newDailyRune.name,

@@ -3,32 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const dailyRunes = JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/dailyRunes.json'), 'utf8')); 
 
-//* Функция для получения или созданию юзера в БД
-
-async function getOrCreateUser (telegramId) {
-  const { data: users, error: userError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('telegram', telegramId); 
-        
-  if (userError) throw new Error("Ошибка базы данных");
-
-  let user = users.length > 0 ? users[0] : null; // Берем первый найденный объект
-
-  if (!user) {
-    const { data: newUser, error: insertUserError } = await supabase
-      .from('users')
-      .insert([{ telegram: telegramId }])
-      .select('id')  // Получаем ID нового пользователя
-      .single();
-      
-    if (insertUserError) throw new Error("Ошибка создания пользователя"); 
-    
-    user = newUser; // Теперь user содержит объект с id
-  }
-  return user;
-}
-
 //* Функция для получения или генерации руны дня
 
 async function getOrCreateUserRune (userId) {
@@ -41,7 +15,6 @@ async function getOrCreateUserRune (userId) {
   if (error) throw new Error("Ошибка при поиске руны дня");
       
   if (!userRune|| userRune.length === 0) {
-    console.log("🆕 Создаём новую запись для userId:", userId);
     const { error: insertError } = await supabase
       .from('users_runes')
       .insert([{ user_id: userId, rune: null }]);
@@ -78,7 +51,6 @@ async function flipRune(userId) {
 };
 
 module.exports = {
-  getOrCreateUser,
   getOrCreateUserRune,
   getRuneById,
   flipRune
