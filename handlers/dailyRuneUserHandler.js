@@ -1,18 +1,20 @@
 const dailyRuneUser = require('../services/dailyRuneUser');
-
+const accountData = require('../services/accountData');
 module.exports = {
   getDailyRune: async (req,res) => {
     try {
       const telegramId = req.params.telegramId;
 
-      const user = await dailyRuneUser.getOrCreateUser(telegramId);
-      let userRune = await dailyRuneUser.getOrCreateUserRune(user.id);
+      const acData = await accountData.accountData(telegramId);
+      //const user = await dailyRuneUser.getOrCreateUser(telegramId);
+      let userRune = await dailyRuneUser.getOrCreateUserRune(acData.userId);
       if (!userRune.rune) {
         // Если rune = NULL, показываем "рубашку" 
         return res.json({
           name: "Скрытая руна",
           image: "./runes/cover.png",
-          description: "Переверните руну, чтобы узнать её значение."
+          description: "Переверните руну, чтобы узнать её значение.",
+          ...acData
         });
       } 
         // Если rune уже есть, значит она перевернута — отправляем её
@@ -20,7 +22,8 @@ module.exports = {
       return res.json({
         name: runeData.name,
         image: runeData.image,
-        description: runeData.description
+        description: runeData.description,
+        ...acData
       });
     } catch (error) {
         console.error("🚨 Ошибка:", error.message);
