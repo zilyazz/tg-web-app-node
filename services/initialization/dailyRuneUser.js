@@ -36,7 +36,7 @@ async function getRuneById(runeId) {
 
   return dailyRunes.find(rune => rune.id === runeId) || null;
 }
-
+/*
 //* Метод для переворачивания руны (т.е. генерации новой руны дня для пользователя)
 
 async function flipRune(userId) {
@@ -49,9 +49,8 @@ async function flipRune(userId) {
   if (updateError) throw updateError;
   return randomRune;
 };
-
+*/
 module.exports = {
   getOrCreateUserRune,
   getRuneById,
-  flipRune
 };

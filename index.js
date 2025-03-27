@@ -8,7 +8,8 @@ const taskService = require('./services/taskService');
 const spreadHandler = require('./handlers/spreadHandler');
 const { getDailyTasksWithStatus, completeTask } = require('./handlers/taskHandler');
 //const { getDailyRune, flipRune } = require('./services/dailyRuneUser');
-const dailyRuneHandler = require('./handlers/dailyRuneUserHandler');
+const initUserDailyRuneHandler = require('./handlers/initUserDailyRuneHandler');
+const flipRune = require('./handlers/flipRuneHandler');
 const raiting = require('./handlers/raitHandler');
 require('dotenv').config(); // Загружаем переменные окружения из .en
 
@@ -29,8 +30,8 @@ app.get('/tasks/daily/:userId', getDailyTasksWithStatus);
 app.post('/tasks/complete', completeTask);
 //app.get('/dailyRuneUser/:telegramId', getDailyRune);
 //app.post('/flipRune/:telegramId',flipRune);
-app.get('/dailyRuneUser/:telegramId', dailyRuneHandler.getDailyRune);
-app.post('/flipRune/:telegramId', dailyRuneHandler.flipRune);
+app.get('/initUserDailyRuneHandler/:telegramId', initUserDailyRuneHandler.getDailyRune);
+app.post('/flipRune/:telegramId', flipRune.flipRune);
 app.get('/raiting', raiting.raitStat);
 
 // Новые endpoint'ы для заданий
