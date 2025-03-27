@@ -1,4 +1,4 @@
-const supabase = require('../supabaseClient');
+const supabase = require('../../supabaseClient');
 
 async function accountData(telegramId) {
   //Проверка на наличие в users

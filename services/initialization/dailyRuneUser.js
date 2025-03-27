@@ -1,7 +1,7 @@
-const supabase = require('../supabaseClient');
+const supabase = require('../../supabaseClient');
 const fs = require('fs');
 const path = require('path');
-const dailyRunes = JSON.parse(fs.readFileSync(path.join(__dirname, '../runeLibr/dailyRunes.json'), 'utf8')); 
+const dailyRunes = JSON.parse(fs.readFileSync(path.join(__dirname, '../../runeLibr/dailyRunes.json'), 'utf8')); 
 
 //* Функция для получения или генерации руны дня
 

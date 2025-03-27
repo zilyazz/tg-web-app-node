@@ -1,5 +1,5 @@
-const dailyRuneUser = require('../services/dailyRuneUser');
-const accountData = require('../services/accountData');
+const dailyRuneUser = require('../services/initialization/dailyRuneUser');
+const accountData = require('../services/initialization/accountData');
 module.exports = {
   getDailyRune: async (req,res) => {
     try {
