@@ -69,11 +69,17 @@ async function generateLayout (theme,type) {
 //*Добавление записи в spread (история расклада)
 async function insertInSpread (telegramId,layout) {     // Сохраняем данные в таблицу spreads в Supabase
   if (layout.theme !='danet'){
+    const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('telegram', telegramId)
+    .single();
+
   const { data, error } = await supabase 
     .from('spreads')
     .insert([
       {
-        Userid: telegramId,      
+        Userid: user.id,      
         Runes: layout.key,
         Description: layout.description,  
         Theme:layout.theme,
@@ -97,7 +103,7 @@ async function addPointsForLayout (telegramId) {
   let newLevel = null;
   let levelUp = false; 
 
-  if (user) {
+  if (user) {  //! Убрать после отладки с Машей
     updatedScore = user.score + 10; // +10 очков денег за расклад
     await supabase
       .from('users')
@@ -112,7 +118,7 @@ async function addPointsForLayout (telegramId) {
       .maybeSingle();
 
     console.log("Найденная запись опыта:", experienceData, "Ошибка:", experienceError);
-
+//! Убрать после отладки с Машей
     if (experienceData) {
       updexpPoints = experienceData.experience + experiencePoints;
       await supabase
@@ -126,7 +132,7 @@ async function addPointsForLayout (telegramId) {
         .from('user_experience')
         .insert([{ user_id: user.id, experience: updexpPoints,level_id: 1 }]);     
     }
-
+//!!!!!!
     //Проверка на уровень (не стоит ли обновить)
     const{data: levelData,error: levelError} = await supabase
     .from('levels')
@@ -146,7 +152,7 @@ async function addPointsForLayout (telegramId) {
         .update({level_id: newLevel})
         .eq ('user_id',user.id)
     }
-
+//! Убрать после отладки с Машей
   } else {
     updatedScore = 10;
     const { data: newUser, error: newUserError } = await supabase
@@ -164,7 +170,7 @@ async function addPointsForLayout (telegramId) {
     
     updexpPoints = experiencePoints;
   }
-
+//!!!!
   return { 
     score: updatedScore, 
     experience: updexpPoints, 

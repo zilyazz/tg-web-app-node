@@ -26,10 +26,8 @@ app.options('*', corsMiddleware); // Обработчик preflight-запрос
 app.post('/generate', apiHandlers.generateLayout);
 app.get('/spread/history/:userId', spreadHandler.getSpreadHistory);
 app.get('/spread/details/:spreadId', spreadHandler.getSpreadDetails);
-app.get('/tasks/daily/:userId', getDailyTasksWithStatus);
+app.get('/tasks/daily/:telegramId', getDailyTasksWithStatus);
 app.post('/tasks/complete', completeTask);
-//app.get('/dailyRuneUser/:telegramId', getDailyRune);
-//app.post('/flipRune/:telegramId',flipRune);
 app.get('/initUserDailyRuneHandler/:telegramId', initUserDailyRuneHandler.getDailyRune);
 app.post('/flipRune/:telegramId', flipRune.flipRune);
 app.get('/raiting', raiting.raitStat);

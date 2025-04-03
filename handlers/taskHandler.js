@@ -1,6 +1,31 @@
-const supabase = require('../supabaseClient');
-const taskChecks = require('../services/taskCheckService');
+const taskService = require('../services/taskService');
 
+module.exports = {
+  getDailyTasksWithStatus: async(req,res) => {
+    try{
+    const{telegramId} = req.params;
+    const dailyTasks = await taskService.getDailyTasksWithStatus(telegramId);
+    res.json(dailyTasks);
+  } catch (error) {
+    console.error('Ошибка получения статуса заданий:', error);
+    res.status(500).json({ message: 'Ошибка получения статуса заданий' });
+  }
+  },
+  completeTask: async (req, res) => {
+    try {
+      const { telegramId, taskId } = req.body;
+      const result = await taskService.completeTask(telegramId, taskId);
+      res.json({newScore: result.newScore });
+    } catch (error) {
+      console.error('Ошибка выполнения задания:', error);
+      res.status(500).json({ message: 'Ошибка выполнения задания' });
+    }
+  }
+};
+
+
+
+/*
 // Получение списка заданий на сегодня и их статуса выполнения
 async function getDailyTasksWithStatus(req, res) {
   const userId = req.params.userId;
@@ -92,7 +117,7 @@ async function getDailyTasksWithStatus(req, res) {
 
       // Теперь обновляем `isCompleted` перед возвратом
       isCompleted = completedTasks.includes(task.task_id);
-    }*/
+    }
       isCompleted = true; // Задание теперь выполнено
       }
     
@@ -179,3 +204,4 @@ async function completeTask(req, res) {
 
 
 module.exports = { getDailyTasksWithStatus, completeTask };
+*/

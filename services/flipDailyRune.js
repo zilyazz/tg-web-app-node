@@ -7,10 +7,10 @@ async function flipRune(telegramId) {
   const randomRune = dailyRunes[Math.floor(Math.random() * dailyRunes.length)];
 
   const { data: user, error: userError } = await supabase
-  .from('users')
-  .select('id')
-  .eq('telegram', telegramId)
-  .single();
+    .from('users')
+    .select('id')
+    .eq('telegram', telegramId)
+    .single();
 
   if (userError) throw userError;
 
